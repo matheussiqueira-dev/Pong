@@ -1,0 +1,235 @@
+:root {
+  --bg-0: #051421;
+  --bg-1: #0b2f45;
+  --panel: #072033;
+  --panel-border: #1a5f85;
+  --text: #e6f6ff;
+  --muted: #9abfd2;
+  --accent-primary: #8ff1ff;
+  --accent-secondary: #ffae6c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--text);
+  background: radial-gradient(circle at 12% 20%, #0f4461 0%, transparent 42%),
+    radial-gradient(circle at 84% 82%, #264f3f 0%, transparent 38%),
+    linear-gradient(135deg, var(--bg-0), var(--bg-1));
+  font-family: "Sora", sans-serif;
+}
+
+.layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 2rem 1rem 2.4rem;
+}
+
+.title-block {
+  margin-bottom: 1.2rem;
+}
+
+.title-block h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 3.8rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.82rem;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+.game-shell {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+}
+
+.canvas-wrap {
+  position: relative;
+  border: 2px solid rgba(143, 241, 255, 0.24);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #03121d;
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.35);
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  background: rgba(2, 13, 22, 0.84);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.overlay.visible {
+  display: flex;
+}
+
+.overlay h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.8rem;
+}
+
+.overlay p {
+  margin: 0.12rem 0;
+  color: #d9efff;
+}
+
+.overlay-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hud-panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0b2a3f, var(--panel));
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.48rem;
+  border-bottom: 1px dashed rgba(154, 191, 210, 0.26);
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.metric strong {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9rem;
+}
+
+.range-control {
+  display: grid;
+  gap: 0.36rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.range-control input {
+  width: 100%;
+}
+
+.range-control output {
+  color: var(--text);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.btn {
+  border: 1px solid #74c8e9;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0f5476, #0a3e59);
+  color: #eaffff;
+  padding: 0.58rem 0.92rem;
+  cursor: pointer;
+  font-family: "Sora", sans-serif;
+  font-weight: 600;
+  transition: transform 100ms ease, filter 120ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  border-color: #f5bc8e;
+  background: linear-gradient(180deg, #8b5a2c, #654321);
+}
+
+.btn-tertiary {
+  width: 100%;
+  border-color: #2c90bc;
+  background: #0c3850;
+}
+
+.shortcuts {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.shortcuts code {
+  font-family: "JetBrains Mono", monospace;
+  color: #effbff;
+}
+
+.camera-error {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  border: 1px solid #ffbc8d;
+  border-radius: 10px;
+  background: rgba(87, 46, 20, 0.82);
+  color: #ffe4cf;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.88rem;
+}
+
+#cameraFeed {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0.01;
+  pointer-events: none;
+}
+
+@media (max-width: 1020px) {
+  .game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-panel {
+    max-width: 600px;
+  }
+}

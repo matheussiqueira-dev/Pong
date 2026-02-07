@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gesture Pong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="title-block">
+        <p class="eyebrow">Interactive Demo</p>
+        <h1>Gesture Pong</h1>
+        <p class="subtitle">Controle a raquete usando apenas o eixo vertical da sua mao.</p>
+      </header>
+
+      <section class="game-shell">
+        <div class="canvas-wrap">
+          <canvas id="gameCanvas" width="960" height="540" aria-label="Campo do jogo Pong"></canvas>
+          <div id="startOverlay" class="overlay visible">
+            <h2>Como jogar</h2>
+            <p>1. Permita acesso a camera.</p>
+            <p>2. Posicione uma mao visivel.</p>
+            <p>3. Suba e desca a mao para mover a raquete.</p>
+            <div class="overlay-actions">
+              <button id="startButton" class="btn">Iniciar com camera</button>
+              <button id="demoButton" class="btn btn-secondary">Iniciar modo demo</button>
+            </div>
+          </div>
+          <div id="cameraError" class="camera-error" hidden></div>
+        </div>
+
+        <aside class="hud-panel">
+          <div class="metric">
+            <span>Rastreamento</span>
+            <strong id="trackingState">Aguardando inicio</strong>
+          </div>
+          <div class="metric">
+            <span>Latencia estimada</span>
+            <strong id="latencyState">-- ms</strong>
+          </div>
+          <label class="range-control" for="sensitivityRange">
+            Sensibilidade
+            <input id="sensitivityRange" type="range" min="60" max="160" value="100" />
+            <output id="sensitivityValue">100%</output>
+          </label>
+          <button id="toggleDemoButton" class="btn btn-tertiary">Modo demo: OFF</button>
+          <button id="restartButton" class="btn btn-tertiary">Reiniciar partida</button>
+          <p class="shortcuts">Atalhos: <code>D</code> alterna demo | <code>R</code> reinicia</p>
+        </aside>
+      </section>
+    </main>
+
+    <video id="cameraFeed" autoplay playsinline muted></video>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
