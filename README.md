@@ -1,133 +1,99 @@
-# Pong por Gestos
+# Gesture Pong
 
-Pong 2D com controle de raquete por gesto de mao em tempo real, projetado para demos rapidas com baixa latencia, leitura visual clara e curva de aprendizado minima.
+Demo interativa de Pong 2D controlada por gestos da mao em tempo real.  
+O objetivo e entregar uma experiencia de apresentacao simples, intuitiva e com baixa latencia para demos publicas.
 
-## Objetivo
+## Visao geral do projeto
 
-Entregar uma experiencia interativa que funcione bem em apresentacoes, eventos e portfolio tecnico:
+- Controle natural por gesto vertical (1D): mao sobe/desce e raquete acompanha no eixo Y.
+- Feedback visual imediato no canvas.
+- Fallback robusto para modo automatico quando a mao nao e detectada.
+- Estrutura modular para facilitar manutencao e evolucao.
 
-- Controle 1D intuitivo (eixo Y da mao -> eixo Y da raquete).
-- Feedback visual imediato.
-- Arquitetura modular e facil de evoluir.
-- Boa performance em maquinas comuns.
+## Conceito de controle por gestos
 
-## Principais recursos
+O input do jogador usa apenas a coordenada `Y` da palma da mao detectada pelo MediaPipe Hands:
 
-- Tracking de mao com MediaPipe Hands.
-- Suavizacao de movimento para reduzir jitter.
-- Deadzone para evitar micro-oscilacao.
-- Fallback automatico quando a mao nao e detectada.
-- Modo demo automatico (sem camera).
-- Ajuste de sensibilidade em tempo real.
-- HUD com estado de tracking e latencia estimada.
-- Janela espelhada da webcam com esqueleto tecnico da mao.
+- Captura de landmarks da mao.
+- Extracao da posicao vertical da palma (media de pontos estaveis).
+- Suavizacao por filtro exponencial para reduzir jitter.
+- Aplicacao de deadzone para evitar micro-oscilacoes.
+- Mapeamento direto para a posicao da raquete do jogador.
 
-## Como funciona o controle por gestos
+Esse modelo reduz curva de aprendizado e funciona bem para demos em eventos.
 
-Fluxo do input:
+## Arquitetura e decisoes tecnicas
 
-1. Captura da camera em tempo real.
-2. Deteccao de landmarks da mao (1 mao).
-3. Extracao da coordenada vertical da palma.
-4. Aplicacao de filtro exponencial + deadzone.
-5. Mapeamento direto para a raquete do jogador.
+Arquitetura em camadas, com separacao de responsabilidades:
 
-Decisao de UX: usar apenas o eixo Y torna o controle natural, previsivel e facil para qualquer publico.
+- `src/vision/CameraCapture.js`
+  - Camada de captura de video da webcam.
+- `src/vision/HandTracker.js`
+  - Camada de processamento MediaPipe Hands.
+- `src/vision/GestureController.js`
+  - Orquestra captura + tracking e aplica suavizacao/deadzone.
+- `src/game/PongEngine.js`
+  - Regras de dominio do Pong: fisica, colisao, pontuacao, reset de rodada, IA adversaria.
+- `src/render/CanvasRenderer.js`
+  - Renderizacao 2D de jogo, placar, indicadores e estados visuais.
+- `src/app/AppController.js`
+  - Orquestra ciclo da aplicacao, eventos UI e roteamento de input (gestual/auto).
+- `src/config/gameConfig.js`
+  - Parametros centrais de jogo e tracking.
+- `src/utils/math.js`
+  - Utilitarios matematicos reutilizaveis.
 
-## Arquitetura
+Principios aplicados:
 
-Separacao por camadas para manter responsabilidade unica:
+- Clean Architecture leve: dominio (engine) independente de detalhes de UI/camera.
+- SOLID pragmatica: classes coesas, baixo acoplamento e extensao simples.
+- Sem overengineering: foco em demo rapida, legivel e performatica.
 
-- `src/vision/CameraCapture.js`: captura de webcam.
-- `src/vision/HandTracker.js`: interface com MediaPipe Hands.
-- `src/vision/GestureController.js`: processamento do sinal gestual e estado de tracking.
-- `src/game/PongEngine.js`: regras do jogo (fisica, colisao, pontuacao, IA).
-- `src/render/CanvasRenderer.js`: renderizacao Canvas 2D e feedback visual.
-- `src/app/AppController.js`: orquestracao de app, eventos de UI e ciclo principal.
-- `src/config/gameConfig.js`: parametros centrais de jogo e tracking.
-- `src/utils/math.js`: utilitarios puros reutilizaveis.
+## Tecnologias utilizadas
 
-Diretrizes aplicadas:
-
-- Clean Architecture pragmatica.
-- SOLID sem overengineering.
-- Dominio isolado de detalhes de camera/render.
-
-## Stack tecnica
-
-- HTML5
-- CSS3
+- HTML5 + CSS3
 - JavaScript (ES Modules)
 - Canvas 2D API
-- MediaPipe Hands
-- MediaPipe Camera Utils
+- MediaPipe Hands (`@mediapipe/hands`)
+- MediaPipe Camera Utils (`@mediapipe/camera_utils`)
 
-## Estrutura do projeto
+## Instrucoes de execucao
 
-```text
-.
-|-- index.html
-|-- src/
-|   |-- app/
-|   |-- config/
-|   |-- game/
-|   |-- render/
-|   |-- utils/
-|   `-- vision/
-`-- README.md
-```
+1. Abra um terminal na pasta do projeto.
+2. Suba um servidor local (necessario para camera e modulos ES).
 
-## Como executar localmente
-
-Pre-requisito: navegador moderno com suporte a camera e permissao de acesso.
-
-1. Clone o repositorio:
-
-```bash
-git clone https://github.com/matheussiqueira-dev/Pong.git
-cd Pong
-```
-
-2. Rode um servidor local (necessario para ES Modules e camera):
+Opcao com Python:
 
 ```bash
 python -m http.server 5173
 ```
 
-ou
+Opcao com Node:
 
 ```bash
 npx serve .
 ```
 
-3. Abra:
+3. Acesse no navegador:
 
-- `http://localhost:5173`
+- `http://localhost:5173` (Python)
+- ou a porta exibida pelo `serve`.
 
-4. Clique em `Iniciar com camera` e permita webcam.
+4. Clique em **Iniciar com camera** e permita acesso a webcam.
 
-## Controles
+Atalhos:
 
-- Movimento da mao para cima/baixo: move a raquete.
-- `D`: alterna modo demo automatico.
-- `R`: reinicia a partida.
+- `D`: alterna modo demo automatico
+- `R`: reinicia partida
 
-## Qualidade e performance
+## Possiveis evolucoes futuras
 
-- Loop com passo fixo no dominio do jogo para consistencia fisica.
-- Renderizacao desacoplada da logica.
-- Processamento de input com suavizacao configuravel.
-- Fallback para manter a demo funcional mesmo sem tracking estavel.
+- Selecao de mao dominante (esquerda/direita).
+- Modo multiplayer local com segundo input (teclado/gamepad).
+- Ajuste dinamico de dificuldade da IA.
+- Detector de gestos adicionais (pausar, reiniciar, menu).
+- Telemetria de latencia e FPS em painel tecnico.
+- Deploy web com HTTPS para uso em dispositivos moveis.
 
-## Evolucoes recomendadas
-
-- Calibracao inicial por usuario.
-- Modo competitivo com dificuldade progressiva.
-- Multiplayer local (teclado/gamepad + gesto).
-- Overlay tecnico com FPS e metricas de tracking.
-- Deploy HTTPS para acesso direto em dispositivos moveis.
-
-## Autor
-
-Autoria: Matheus Siqueira  
+Autoria: Matheus Siqueira
 Website: https://www.matheussiqueira.dev/
