@@ -1,0 +1,16 @@
+{
+  "name": "gesture-pong-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pong 2D com controle por gestos e backend de leaderboard/telemetria.",
+  "type": "module",
+  "scripts": {
+    "start:web": "npx serve .",
+    "start:api": "node backend/server.js",
+    "check": "node --check src/main.js && node --check backend/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -29,6 +29,10 @@ export const GAME_CONFIG = {
     fallbackDelayMs: 850,
     autoTrackSpeed: 680,
   },
+  match: {
+    winningScore: 7,
+    leaderboardLimit: 7,
+  },
 };
 
 export const TRACKING_CONFIG = {

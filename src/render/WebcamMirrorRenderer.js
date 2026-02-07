@@ -12,8 +12,8 @@ export class WebcamMirrorRenderer {
     this.canvas = canvasElement;
     this.video = videoElement;
     this.ctx = canvasElement.getContext("2d");
-    this.baseWidth = canvasElement.width;
-    this.baseHeight = canvasElement.height;
+    this.width = canvasElement.width;
+    this.height = canvasElement.height;
     this.dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 
     this.syncCanvasResolution();
@@ -21,8 +21,8 @@ export class WebcamMirrorRenderer {
   }
 
   syncCanvasResolution() {
-    const width = Math.floor(this.baseWidth * this.dpr);
-    const height = Math.floor(this.baseHeight * this.dpr);
+    const width = Math.floor(this.width * this.dpr);
+    const height = Math.floor(this.height * this.dpr);
     if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;
       this.canvas.height = height;
@@ -31,112 +31,96 @@ export class WebcamMirrorRenderer {
   }
 
   render(state, cameraActive) {
-    const width = this.baseWidth;
-    const height = this.baseHeight;
-
-    this.drawFrame(width, height, state?.tracked ?? false);
-
     if (cameraActive && this.video.readyState >= 2) {
-      this.drawMirroredVideo(width, height);
+      this.drawMirroredVideo();
     } else {
-      this.drawOfflinePlaceholder(width, height);
+      this.drawOfflineFrame();
     }
+
+    this.drawOverlayGrid();
 
     if (state?.tracked && Array.isArray(state.landmarks) && state.landmarks.length > 0) {
-      this.drawHandSkeleton(state.landmarks, width, height);
+      this.drawSkeleton(state.landmarks);
     }
-
-    this.drawHudLines(width, height);
   }
 
-  drawMirroredVideo(width, height) {
+  drawMirroredVideo() {
     const ctx = this.ctx;
     ctx.save();
-    ctx.translate(width, 0);
+    ctx.translate(this.width, 0);
     ctx.scale(-1, 1);
-    ctx.drawImage(this.video, 0, 0, width, height);
+    ctx.drawImage(this.video, 0, 0, this.width, this.height);
     ctx.restore();
-
-    ctx.fillStyle = "rgba(2, 26, 38, 0.14)";
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "rgba(3, 29, 46, 0.16)";
+    ctx.fillRect(0, 0, this.width, this.height);
   }
 
-  drawOfflinePlaceholder(width, height) {
+  drawOfflineFrame() {
     const ctx = this.ctx;
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "rgba(6, 34, 52, 0.9)");
-    gradient.addColorStop(1, "rgba(3, 19, 30, 1)");
+    const gradient = ctx.createLinearGradient(0, 0, this.width, this.height);
+    gradient.addColorStop(0, "rgba(4, 26, 40, 0.93)");
+    gradient.addColorStop(1, "rgba(1, 16, 25, 0.95)");
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, this.width, this.height);
 
-    ctx.fillStyle = "rgba(155, 196, 216, 0.82)";
+    ctx.fillStyle = "rgba(168, 209, 229, 0.82)";
     ctx.textAlign = "center";
-    ctx.font = "600 13px 'JetBrains Mono', monospace";
-    ctx.fillText("CAMERA OFFLINE", width / 2, height / 2 - 4);
-    ctx.fillStyle = "rgba(155, 196, 216, 0.62)";
-    ctx.font = "500 11px 'JetBrains Mono', monospace";
-    ctx.fillText("Inicie com camera para visualizar o espelho", width / 2, height / 2 + 16);
+    ctx.font = "600 12px 'JetBrains Mono', monospace";
+    ctx.fillText("CAMERA OFFLINE", this.width / 2, this.height / 2 - 2);
   }
 
-  drawHandSkeleton(landmarks, width, height) {
+  drawOverlayGrid() {
     const ctx = this.ctx;
-    const toScreen = (lm) => ({
-      x: (1 - lm.x) * width,
-      y: lm.y * height,
+    ctx.save();
+    ctx.strokeStyle = "rgba(143, 239, 255, 0.17)";
+    ctx.lineWidth = 1;
+    for (let y = 20; y < this.height; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  drawSkeleton(landmarks) {
+    const ctx = this.ctx;
+    const toScreen = (point) => ({
+      x: (1 - point.x) * this.width,
+      y: point.y * this.height,
     });
 
     ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "rgba(142, 241, 255, 0.8)";
-    ctx.lineWidth = 2;
-    ctx.shadowColor = "rgba(130, 220, 255, 0.75)";
+    ctx.strokeStyle = "rgba(141, 242, 255, 0.86)";
     ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(124, 224, 255, 0.76)";
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
 
-    for (const [a, b] of HAND_CONNECTIONS) {
-      const from = landmarks[a];
-      const to = landmarks[b];
-      if (!from || !to) {
+    for (const [from, to] of HAND_CONNECTIONS) {
+      const start = landmarks[from];
+      const end = landmarks[to];
+      if (!start || !end) {
         continue;
       }
-      const p0 = toScreen(from);
-      const p1 = toScreen(to);
+      const p0 = toScreen(start);
+      const p1 = toScreen(end);
       ctx.beginPath();
       ctx.moveTo(p0.x, p0.y);
       ctx.lineTo(p1.x, p1.y);
       ctx.stroke();
     }
 
-    for (let i = 0; i < landmarks.length; i += 1) {
-      const p = toScreen(landmarks[i]);
-      const isCore = i === 0 || i === 5 || i === 9 || i === 13 || i === 17;
+    for (let index = 0; index < landmarks.length; index += 1) {
+      const point = toScreen(landmarks[index]);
+      const isPalmAnchor = index === 0 || index === 5 || index === 9 || index === 13 || index === 17;
+      ctx.fillStyle = isPalmAnchor ? "rgba(245, 177, 113, 0.95)" : "rgba(144, 243, 255, 0.95)";
       ctx.beginPath();
-      ctx.fillStyle = isCore ? "rgba(255, 175, 106, 0.95)" : "rgba(143, 241, 255, 0.95)";
-      ctx.arc(p.x, p.y, isCore ? 3.6 : 2.4, 0, Math.PI * 2);
+      ctx.arc(point.x, point.y, isPalmAnchor ? 3.2 : 2.1, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.restore();
-  }
 
-  drawFrame(width, height, tracked) {
-    const ctx = this.ctx;
-    const color = tracked ? "rgba(143, 241, 255, 0.7)" : "rgba(143, 241, 255, 0.35)";
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
-  }
-
-  drawHudLines(width, height) {
-    const ctx = this.ctx;
-    ctx.save();
-    ctx.strokeStyle = "rgba(143, 241, 255, 0.15)";
-    ctx.lineWidth = 1;
-    for (let y = 24; y < height; y += 24) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
     ctx.restore();
   }
 }

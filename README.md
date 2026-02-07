@@ -1,99 +1,213 @@
-# Gesture Pong
+# Gesture Pong Pro
 
-Demo interativa de Pong 2D controlada por gestos da mao em tempo real.  
-O objetivo e entregar uma experiencia de apresentacao simples, intuitiva e com baixa latencia para demos publicas.
+Aplicacao fullstack para demo interativa de Pong 2D controlado por gestos de mao, com foco em baixa latencia, UX de alto contraste e arquitetura pronta para evolucao.
 
-## Visao geral do projeto
+## Visao geral
 
-- Controle natural por gesto vertical (1D): mao sobe/desce e raquete acompanha no eixo Y.
-- Feedback visual imediato no canvas.
-- Fallback robusto para modo automatico quando a mao nao e detectada.
-- Estrutura modular para facilitar manutencao e evolucao.
+O projeto foi estruturado para atender dois objetivos:
 
-## Conceito de controle por gestos
+- Entregar uma experiencia de apresentacao rapida e intuitiva (camera + gesto vertical da mao).
+- Sustentar evolucao de produto com backend versionado para telemetria e leaderboard.
 
-O input do jogador usa apenas a coordenada `Y` da palma da mao detectada pelo MediaPipe Hands:
+### Publico-alvo
 
-- Captura de landmarks da mao.
-- Extracao da posicao vertical da palma (media de pontos estaveis).
-- Suavizacao por filtro exponencial para reduzir jitter.
-- Aplicacao de deadzone para evitar micro-oscilacoes.
-- Mapeamento direto para a posicao da raquete do jogador.
-
-Esse modelo reduz curva de aprendizado e funciona bem para demos em eventos.
+- Eventos, demos tecnicas e showcases de produto.
+- Portfolio de frontend interativo + visao computacional.
+- Experimentacao de interfaces naturais (gestos).
 
 ## Arquitetura e decisoes tecnicas
 
-Arquitetura em camadas, com separacao de responsabilidades:
+### Frontend (Clean Architecture pragmatica)
 
-- `src/vision/CameraCapture.js`
-  - Camada de captura de video da webcam.
-- `src/vision/HandTracker.js`
-  - Camada de processamento MediaPipe Hands.
-- `src/vision/GestureController.js`
-  - Orquestra captura + tracking e aplica suavizacao/deadzone.
-- `src/game/PongEngine.js`
-  - Regras de dominio do Pong: fisica, colisao, pontuacao, reset de rodada, IA adversaria.
-- `src/render/CanvasRenderer.js`
-  - Renderizacao 2D de jogo, placar, indicadores e estados visuais.
 - `src/app/AppController.js`
-  - Orquestra ciclo da aplicacao, eventos UI e roteamento de input (gestual/auto).
-- `src/config/gameConfig.js`
-  - Parametros centrais de jogo e tracking.
-- `src/utils/math.js`
-  - Utilitarios matematicos reutilizaveis.
+  - Orquestracao da aplicacao (loop, estados, integracao entre camadas).
+- `src/app/UIFacade.js`
+  - Camada de UI desacoplada da logica de dominio.
+- `src/game/PongEngine.js`
+  - Regras de negocio: fisica, colisao, pontuacao, fim de partida.
+- `src/render/CanvasRenderer.js`
+  - Renderizacao do jogo em Canvas 2D.
+- `src/render/WebcamMirrorRenderer.js`
+  - Espelhamento da webcam + esqueleto tecnico da mao.
+- `src/vision/CameraCapture.js`, `src/vision/HandTracker.js`, `src/vision/GestureController.js`
+  - Captura de video, tracking da mao e processamento/suavizacao de input.
+- `src/services/BackendClient.js`
+  - Cliente HTTP para API (`/api/v1`).
 
-Principios aplicados:
+### Backend (Node.js, REST versionada)
 
-- Clean Architecture leve: dominio (engine) independente de detalhes de UI/camera.
-- SOLID pragmatica: classes coesas, baixo acoplamento e extensao simples.
-- Sem overengineering: foco em demo rapida, legivel e performatica.
+- `backend/server.js`
+  - API REST com rotas versionadas (`/api/v1`).
+  - Validacao de payload, CORS configuravel, rate limiting em memoria, tratamento de erros.
+- `backend/store/SessionStore.js`
+  - Persistencia simples em JSON com escrita atomica.
+- `backend/config.js`
+  - Config central via variaveis de ambiente.
 
-## Tecnologias utilizadas
+### Principios aplicados
 
-- HTML5 + CSS3
+- SOLID e separacao de responsabilidades.
+- DRY em componentes de UI e acesso a dados.
+- Contratos de API claros com versionamento.
+- Evolucao incremental sem overengineering.
+
+## Regra de rastreamento e descoberta online
+
+Nenhuma estrutura existente de rastreamento, indexacao ou descoberta foi removida/alterada de forma a quebrar comportamento.
+
+- Scripts e integracoes de terceiros existentes foram preservados.
+- Mudancas visuais e estruturais foram isoladas da camada de metadata/rastreamento.
+
+## Stack
+
+- HTML5
+- CSS3
 - JavaScript (ES Modules)
 - Canvas 2D API
 - MediaPipe Hands (`@mediapipe/hands`)
 - MediaPipe Camera Utils (`@mediapipe/camera_utils`)
+- Node.js (HTTP API)
+- Node Test Runner (`node:test`)
 
-## Instrucoes de execucao
+## Estrutura do projeto
 
-1. Abra um terminal na pasta do projeto.
-2. Suba um servidor local (necessario para camera e modulos ES).
-
-Opcao com Python:
-
-```bash
-python -m http.server 5173
+```text
+.
+|-- backend/
+|   |-- config.js
+|   |-- server.js
+|   |-- data/
+|   `-- store/
+|-- src/
+|   |-- app/
+|   |-- config/
+|   |-- game/
+|   |-- render/
+|   |-- services/
+|   |-- utils/
+|   `-- vision/
+|-- tests/
+|-- index.html
+|-- package.json
+`-- README.md
 ```
 
-Opcao com Node:
+## Funcionalidades implementadas
 
-```bash
-npx serve .
+- Controle por gesto vertical da mao (1D).
+- Suavizacao de movimento com deadzone para reduzir jitter.
+- Fallback automatico para controle assistido quando tracking falha.
+- Webcam espelhada com esqueleto tecnico da mao.
+- Modo demo automatico.
+- Fim de partida por objetivo de pontuacao.
+- Telemetria de sessao com persistencia em backend.
+- Leaderboard exibido na interface.
+- Indicadores tecnicos em tempo real (tracking, latencia, FPS, estado da API).
+
+## API (v1)
+
+Base URL: `http://127.0.0.1:8787/api/v1`
+
+- `GET /health`
+  - Health check da API.
+- `GET /config`
+  - Configuracoes publicas da API.
+- `GET /leaderboard?limit=7`
+  - Top partidas ordenadas por desempenho.
+- `GET /sessions`
+  - Lista completa de sessoes registradas.
+- `POST /sessions`
+  - Registra uma sessao finalizada.
+
+Payload de exemplo (`POST /sessions`):
+
+```json
+{
+  "playerScore": 7,
+  "aiScore": 4,
+  "winner": "player",
+  "durationMs": 92000,
+  "controlMode": "gesture",
+  "trackingLatencyMs": 33
+}
 ```
 
-3. Acesse no navegador:
+## Instalacao e execucao
 
-- `http://localhost:5173` (Python)
-- ou a porta exibida pelo `serve`.
+### Pre-requisitos
 
-4. Clique em **Iniciar com camera** e permita acesso a webcam.
+- Node.js 18+
+- Navegador moderno com suporte a webcam
 
-Atalhos:
+### 1) Instalar dependencias (somente se adicionar libs extras no futuro)
 
-- `D`: alterna modo demo automatico
-- `R`: reinicia partida
+```bash
+npm install
+```
 
-## Possiveis evolucoes futuras
+### 2) Rodar frontend
 
-- Selecao de mao dominante (esquerda/direita).
-- Modo multiplayer local com segundo input (teclado/gamepad).
-- Ajuste dinamico de dificuldade da IA.
-- Detector de gestos adicionais (pausar, reiniciar, menu).
-- Telemetria de latencia e FPS em painel tecnico.
-- Deploy web com HTTPS para uso em dispositivos moveis.
+```bash
+npm run start:web
+```
 
-Autoria: Matheus Siqueira
+Frontend em geral: `http://127.0.0.1:3000` ou porta informada pelo `serve`.
+
+### 3) Rodar backend
+
+```bash
+npm run start:api
+```
+
+API em: `http://127.0.0.1:8787`.
+
+## Testes e validacao
+
+Executar toda a suite:
+
+```bash
+npm test
+```
+
+Validar sintaxe principal:
+
+```bash
+npm run check
+```
+
+## Deploy
+
+### Frontend
+
+- Servir arquivos estaticos em CDN/edge (Cloudflare Pages, Vercel, Netlify, Nginx).
+- Habilitar HTTPS para acesso a webcam em producao.
+
+### Backend
+
+- Deploy Node.js (Render, Railway, Fly.io, VPS, container).
+- Configurar variaveis:
+  - `API_HOST`
+  - `API_PORT`
+  - `API_CORS_ORIGINS`
+  - `API_WRITE_KEY` (opcional, recomendado em producao)
+
+## Boas praticas adotadas
+
+- UI com contraste elevado, sem comprometer legibilidade a distancia.
+- Componentizacao e separacao entre dominio, render e infraestrutura.
+- Validacao de dados na API.
+- Rate limiting para reduzir abuso.
+- Persistencia atomica de dados.
+- Tratamento de falhas com fallback de experiencia.
+
+## Melhorias futuras
+
+- Autenticacao de usuarios e perfis.
+- Persistencia em banco relacional/NoSQL.
+- Observabilidade completa (tracing, metrics, dashboards).
+- Modo multiplayer e torneios.
+- Exportacao de estatisticas por sessao.
+- Testes E2E no navegador.
+
+Autoria: Matheus Siqueira  
 Website: https://www.matheussiqueira.dev/

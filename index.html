@@ -13,49 +13,104 @@
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <main class="layout">
-      <header class="title-block">
-        <p class="eyebrow">Interactive Demo</p>
-        <h1>Gesture Pong</h1>
-        <p class="subtitle">Controle a raquete usando apenas o eixo vertical da sua mao.</p>
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="hero-eyebrow">Gesture-Controlled Experience</p>
+          <h1>Gesture Pong Pro</h1>
+          <p class="hero-subtitle">
+            Demo de Pong 2D com controle natural por gestos, baixa latencia e arquitetura pronta
+            para evolucao.
+          </p>
+        </div>
+        <div class="hero-pills" aria-label="Indicadores de estado">
+          <span class="pill">Tracking em tempo real</span>
+          <span class="pill">Canvas 2D otimizado</span>
+          <span class="pill">API versionada</span>
+        </div>
       </header>
 
-      <section class="game-shell">
-        <div class="canvas-wrap">
-          <canvas id="gameCanvas" width="960" height="540" aria-label="Campo do jogo Pong"></canvas>
-          <div id="startOverlay" class="overlay visible">
-            <h2>Como jogar</h2>
-            <p>1. Permita acesso a camera.</p>
-            <p>2. Posicione uma mao visivel.</p>
-            <p>3. Suba e desca a mao para mover a raquete.</p>
-            <div class="overlay-actions">
-              <button id="startButton" class="btn">Iniciar com camera</button>
-              <button id="demoButton" class="btn btn-secondary">Iniciar modo demo</button>
-            </div>
+      <section class="workspace">
+        <article class="game-card" aria-label="Area principal do jogo">
+          <div class="game-header">
+            <p class="game-label">Arena</p>
+            <strong id="sessionState">Sessao pronta</strong>
           </div>
-          <div id="cameraError" class="camera-error" hidden></div>
-        </div>
 
-        <aside class="hud-panel">
-          <div class="metric">
-            <span>Rastreamento</span>
-            <strong id="trackingState">Aguardando inicio</strong>
+          <div class="canvas-wrap">
+            <canvas id="gameCanvas" width="960" height="540" aria-label="Campo do jogo Pong"></canvas>
+            <div id="startOverlay" class="overlay visible" role="dialog" aria-modal="true">
+              <h2>Iniciar Partida</h2>
+              <p>1. Permita acesso a camera.</p>
+              <p>2. Posicione a mao no enquadramento.</p>
+              <p>3. Mova a mao no eixo vertical para controlar a raquete.</p>
+              <div class="overlay-actions">
+                <button id="startButton" class="btn btn-primary">Iniciar com camera</button>
+                <button id="demoButton" class="btn btn-ghost">Iniciar modo demo</button>
+              </div>
+            </div>
+            <div id="cameraError" class="camera-error" hidden></div>
           </div>
-          <div class="metric">
-            <span>Latencia estimada</span>
-            <strong id="latencyState">-- ms</strong>
-          </div>
-          <label class="range-control" for="sensitivityRange">
-            Sensibilidade
-            <input id="sensitivityRange" type="range" min="60" max="160" value="100" />
-            <output id="sensitivityValue">100%</output>
-          </label>
-          <button id="toggleDemoButton" class="btn btn-tertiary">Modo demo: OFF</button>
-          <button id="restartButton" class="btn btn-tertiary">Reiniciar partida</button>
-          <p class="shortcuts">Atalhos: <code>D</code> alterna demo | <code>R</code> reinicia</p>
+        </article>
+
+        <aside class="side-column">
+          <section class="panel">
+            <h2>Telemetria</h2>
+            <div class="stats-grid">
+              <div class="stat">
+                <span>Tracking</span>
+                <strong id="trackingState">Aguardando inicio</strong>
+              </div>
+              <div class="stat">
+                <span>Latencia</span>
+                <strong id="latencyState">-- ms</strong>
+              </div>
+              <div class="stat">
+                <span>FPS</span>
+                <strong id="fpsState">--</strong>
+              </div>
+              <div class="stat">
+                <span>API</span>
+                <strong id="backendState">Desconhecido</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Controle</h2>
+            <label class="range-control" for="sensitivityRange">
+              Sensibilidade
+              <input id="sensitivityRange" type="range" min="60" max="160" value="100" />
+              <output id="sensitivityValue">100%</output>
+            </label>
+            <button id="toggleDemoButton" class="btn btn-secondary">Modo demo: OFF</button>
+            <button id="restartButton" class="btn btn-secondary">Reiniciar partida</button>
+            <p class="shortcuts">Atalhos: <code>D</code> demo | <code>R</code> reinicia</p>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>Mirror Cam</h2>
+              <strong id="webcamState">OFFLINE</strong>
+            </div>
+            <canvas
+              id="webcamCanvas"
+              width="320"
+              height="196"
+              aria-label="Webcam espelhada com esqueleto tecnico da mao"
+            ></canvas>
+          </section>
+
+          <section class="panel">
+            <h2>Leaderboard</h2>
+            <ol id="leaderboardList" class="leaderboard-list" aria-label="Top partidas"></ol>
+            <p id="leaderboardEmpty" class="leaderboard-empty">Sem partidas registradas.</p>
+          </section>
         </aside>
       </section>
     </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <video id="cameraFeed" autoplay playsinline muted></video>
 

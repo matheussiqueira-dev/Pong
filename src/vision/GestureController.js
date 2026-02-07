@@ -21,6 +21,7 @@ export class GestureController {
     this.smoothedY = 0.5;
     this.outputY = 0.5;
     this.tracked = false;
+    this.latestLandmarks = [];
 
     this.latencySamples = [];
     this.avgLatencyMs = null;
@@ -50,12 +51,18 @@ export class GestureController {
     });
 
     this.isRunning = true;
-    await this.camera.start();
+    try {
+      await this.camera.start();
+    } catch (error) {
+      this.isRunning = false;
+      throw error;
+    }
   }
 
   stop() {
     this.isRunning = false;
     this.tracked = false;
+    this.latestLandmarks = [];
     if (this.camera) {
       this.camera.stop();
     }
@@ -80,6 +87,7 @@ export class GestureController {
       normalizedY: this.outputY,
       rawY: this.rawY,
       latencyMs: this.avgLatencyMs,
+      landmarks: this.latestLandmarks,
     };
   }
 
@@ -90,6 +98,7 @@ export class GestureController {
     const landmarks = results.multiHandLandmarks?.[0];
     if (!landmarks) {
       this.tracked = false;
+      this.latestLandmarks = [];
       return;
     }
 
@@ -120,6 +129,7 @@ export class GestureController {
 
     this.tracked = true;
     this.lastTrackedAt = now;
+    this.latestLandmarks = landmarks.map((point) => ({ x: point.x, y: point.y, z: point.z }));
   }
 
   recordLatency(now) {

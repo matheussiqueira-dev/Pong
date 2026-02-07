@@ -26,9 +26,11 @@ export class CanvasRenderer {
     this.drawPaddles(snapshot);
     this.drawBall(snapshot.ball);
     this.drawScore(snapshot.score);
+    this.drawTargetScore(snapshot.match.winningScore);
     this.drawModeBadge(snapshot.controlMode, overlays.demoModeActive);
     this.drawHandIndicator(overlays);
-    this.drawRoundCountdown(snapshot.roundResetTimerMs);
+    this.drawRoundCountdown(snapshot.roundResetTimerMs, snapshot.match.over);
+    this.drawMatchResult(snapshot.match);
   }
 
   drawBackground() {
@@ -102,6 +104,16 @@ export class CanvasRenderer {
     ctx.restore();
   }
 
+  drawTargetScore(winningScore) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = "rgba(232, 245, 255, 0.8)";
+    ctx.textAlign = "center";
+    ctx.font = "500 14px 'Sora', sans-serif";
+    ctx.fillText(`Primeiro a ${winningScore}`, this.width / 2, 30);
+    ctx.restore();
+  }
+
   drawModeBadge(controlMode, demoModeActive) {
     const ctx = this.ctx;
     const text = demoModeActive
@@ -143,8 +155,8 @@ export class CanvasRenderer {
     ctx.restore();
   }
 
-  drawRoundCountdown(roundResetTimerMs) {
-    if (roundResetTimerMs <= 0) {
+  drawRoundCountdown(roundResetTimerMs, matchOver) {
+    if (roundResetTimerMs <= 0 || matchOver) {
       return;
     }
 
@@ -157,6 +169,26 @@ export class CanvasRenderer {
     ctx.textAlign = "center";
     ctx.font = "600 20px 'Sora', sans-serif";
     ctx.fillText(`Novo saque em ${seconds}s`, this.width / 2, this.height / 2 + 8);
+    ctx.restore();
+  }
+
+  drawMatchResult(match) {
+    if (!match.over) {
+      return;
+    }
+
+    const ctx = this.ctx;
+    const winnerText = match.winner === "player" ? "Voce venceu" : "IA venceu";
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
+    ctx.fillRect(this.width / 2 - 180, this.height / 2 - 54, 360, 100);
+    ctx.fillStyle = "#ebfaff";
+    ctx.textAlign = "center";
+    ctx.font = "700 31px 'Sora', sans-serif";
+    ctx.fillText(winnerText, this.width / 2, this.height / 2 - 8);
+    ctx.font = "500 15px 'JetBrains Mono', monospace";
+    ctx.fillText("Pressione R para nova partida", this.width / 2, this.height / 2 + 23);
     ctx.restore();
   }
 }

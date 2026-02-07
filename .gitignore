@@ -1,0 +1,4 @@
+node_modules/
+backend/data/sessions.json
+backend/data/sessions.json.tmp
+*.log

@@ -17,6 +17,9 @@ export class PongEngine {
     this.playerScore = 0;
     this.aiScore = 0;
     this.lastScorer = null;
+    this.matchOver = false;
+    this.winner = null;
+    this.elapsedMatchMs = 0;
     this.playerPaddleY = 0;
     this.aiPaddleY = 0;
     this.ball = {
@@ -38,6 +41,9 @@ export class PongEngine {
     this.aiPaddleY = (this.height - this.config.paddle.height) / 2;
     this.roundResetTimerMs = this.config.ball.resetDelayMs;
     this.lastScorer = null;
+    this.matchOver = false;
+    this.winner = null;
+    this.elapsedMatchMs = 0;
     this.resetBall(Math.random() > 0.5 ? 1 : -1);
   }
 
@@ -59,9 +65,17 @@ export class PongEngine {
   step(dt) {
     this.updatePlayerPaddle(dt);
     this.updateAiPaddle(dt);
+    this.elapsedMatchMs += dt * 1000;
+
+    if (this.matchOver) {
+      return;
+    }
 
     if (this.roundResetTimerMs > 0) {
       this.roundResetTimerMs -= dt * 1000;
+      if (this.roundResetTimerMs < 0) {
+        this.roundResetTimerMs = 0;
+      }
       return;
     }
 
@@ -153,12 +167,33 @@ export class PongEngine {
     if (this.ball.x + radius < 0) {
       this.aiScore += 1;
       this.lastScorer = "ai";
-      this.startNextRound(1);
+      this.checkWinnerOrAdvance(1, "ai");
     } else if (this.ball.x - radius > this.width) {
       this.playerScore += 1;
       this.lastScorer = "player";
-      this.startNextRound(-1);
+      this.checkWinnerOrAdvance(-1, "player");
     }
+  }
+
+  checkWinnerOrAdvance(nextDirection, scorer) {
+    if (this.playerScore >= this.config.match.winningScore) {
+      this.finalizeMatch("player");
+      return;
+    }
+    if (this.aiScore >= this.config.match.winningScore) {
+      this.finalizeMatch("ai");
+      return;
+    }
+    this.startNextRound(nextDirection);
+    this.lastScorer = scorer;
+  }
+
+  finalizeMatch(winner) {
+    this.matchOver = true;
+    this.winner = winner;
+    this.roundResetTimerMs = 0;
+    this.ball.vx = 0;
+    this.ball.vy = 0;
   }
 
   startNextRound(initialDirection) {
@@ -191,6 +226,12 @@ export class PongEngine {
       roundResetTimerMs: Math.max(0, this.roundResetTimerMs),
       controlMode: this.playerControlMode,
       lastScorer: this.lastScorer,
+      match: {
+        over: this.matchOver,
+        winner: this.winner,
+        elapsedMs: this.elapsedMatchMs,
+        winningScore: this.config.match.winningScore,
+      },
     };
   }
 }
