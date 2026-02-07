@@ -53,6 +53,20 @@
           <button id="toggleDemoButton" class="btn btn-tertiary">Modo demo: OFF</button>
           <button id="restartButton" class="btn btn-tertiary">Reiniciar partida</button>
           <p class="shortcuts">Atalhos: <code>D</code> alterna demo | <code>R</code> reinicia</p>
+
+          <section class="webcam-panel" aria-label="Preview da webcam espelhada">
+            <div class="webcam-head">
+              <span>Mirror Cam</span>
+              <strong id="webcamState">OFFLINE</strong>
+            </div>
+            <canvas
+              id="webcamCanvas"
+              width="320"
+              height="200"
+              aria-label="Janela espelhada da webcam com esqueleto da mao"
+            ></canvas>
+            <p class="webcam-tip">Espelhamento em tempo real com overlay tecnico da mao.</p>
+          </section>
         </aside>
       </section>
     </main>

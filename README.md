@@ -20,6 +20,7 @@ Entregar uma experiencia interativa que funcione bem em apresentacoes, eventos e
 - Modo demo automatico (sem camera).
 - Ajuste de sensibilidade em tempo real.
 - HUD com estado de tracking e latencia estimada.
+- Janela espelhada da webcam com esqueleto tecnico da mao.
 
 ## Como funciona o controle por gestos
 

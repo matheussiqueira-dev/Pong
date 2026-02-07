@@ -21,6 +21,7 @@ export class GestureController {
     this.smoothedY = 0.5;
     this.outputY = 0.5;
     this.tracked = false;
+    this.latestLandmarks = [];
 
     this.latencySamples = [];
     this.avgLatencyMs = null;
@@ -80,6 +81,7 @@ export class GestureController {
       normalizedY: this.outputY,
       rawY: this.rawY,
       latencyMs: this.avgLatencyMs,
+      landmarks: this.latestLandmarks,
     };
   }
 
@@ -90,6 +92,7 @@ export class GestureController {
     const landmarks = results.multiHandLandmarks?.[0];
     if (!landmarks) {
       this.tracked = false;
+      this.latestLandmarks = [];
       return;
     }
 
@@ -120,6 +123,11 @@ export class GestureController {
 
     this.tracked = true;
     this.lastTrackedAt = now;
+    this.latestLandmarks = landmarks.map((landmark) => ({
+      x: landmark.x,
+      y: landmark.y,
+      z: landmark.z,
+    }));
   }
 
   recordLatency(now) {

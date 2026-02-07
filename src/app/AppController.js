@@ -1,18 +1,21 @@
 import { GAME_CONFIG } from "../config/gameConfig.js";
 import { PongEngine } from "../game/PongEngine.js";
 import { CanvasRenderer } from "../render/CanvasRenderer.js";
+import { WebcamMirrorRenderer } from "../render/WebcamMirrorRenderer.js";
 import { GestureController } from "../vision/GestureController.js";
 
 export class AppController {
   constructor(doc) {
     this.doc = doc;
     this.canvas = doc.getElementById("gameCanvas");
+    this.webcamCanvas = doc.getElementById("webcamCanvas");
     this.video = doc.getElementById("cameraFeed");
 
     this.overlay = doc.getElementById("startOverlay");
     this.cameraError = doc.getElementById("cameraError");
     this.trackingState = doc.getElementById("trackingState");
     this.latencyState = doc.getElementById("latencyState");
+    this.webcamState = doc.getElementById("webcamState");
     this.sensitivityRange = doc.getElementById("sensitivityRange");
     this.sensitivityValue = doc.getElementById("sensitivityValue");
 
@@ -23,6 +26,7 @@ export class AppController {
 
     this.engine = new PongEngine(GAME_CONFIG);
     this.renderer = new CanvasRenderer(this.canvas, GAME_CONFIG.canvas);
+    this.webcamRenderer = new WebcamMirrorRenderer(this.webcamCanvas, this.video);
     this.gesture = new GestureController(this.video);
 
     this.running = false;
@@ -153,12 +157,14 @@ export class AppController {
   renderFrame() {
     const snapshot = this.engine.getSnapshot();
     const showIndicator = !this.demoMode && this.cameraStarted && this.latestTracking.tracked;
+    const cameraActive = this.cameraStarted;
 
     this.renderer.render(snapshot, {
       handY: this.latestTracking.normalizedY,
       showHandIndicator: showIndicator,
       demoModeActive: this.demoMode,
     });
+    this.webcamRenderer.render(this.latestTracking, cameraActive);
 
     this.updateHud(snapshot.controlMode);
   }
@@ -180,6 +186,14 @@ export class AppController {
       this.latencyState.textContent = `${Math.round(this.latestTracking.latencyMs)} ms`;
     } else {
       this.latencyState.textContent = "-- ms";
+    }
+
+    if (!this.cameraStarted) {
+      this.webcamState.textContent = "OFFLINE";
+    } else if (this.latestTracking.tracked) {
+      this.webcamState.textContent = "TRACKING";
+    } else {
+      this.webcamState.textContent = "ON AIR";
     }
   }
 }
