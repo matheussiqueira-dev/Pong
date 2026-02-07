@@ -24,6 +24,7 @@ export class PongEngine {
       y: this.height / 2,
       vx: 0,
       vy: 0,
+      radius: config.ball.radius,
       speed: config.ball.initialSpeed,
     };
 
@@ -169,6 +170,7 @@ export class PongEngine {
     const angle = randomFromRange(-this.config.ball.maxDeflectionRad * 0.6, this.config.ball.maxDeflectionRad * 0.6);
     this.ball.x = this.width / 2;
     this.ball.y = this.height / 2;
+    this.ball.radius = this.config.ball.radius;
     this.ball.speed = this.config.ball.initialSpeed;
     this.ball.vx = Math.cos(angle) * this.ball.speed * initialDirection;
     this.ball.vy = Math.sin(angle) * this.ball.speed;

@@ -80,12 +80,13 @@ export class CanvasRenderer {
 
   drawBall(ball) {
     const ctx = this.ctx;
+    const radius = Number.isFinite(ball.radius) ? ball.radius : 9;
     ctx.save();
     ctx.fillStyle = "#f5fbff";
     ctx.shadowBlur = 18;
     ctx.shadowColor = "#8de6ff";
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.arc(ball.x, ball.y, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
